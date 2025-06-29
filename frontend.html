@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistant Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Apply Inter font and basic styling to the body */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Equivalent to bg-gray-100 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* Container for the entire chatbot to center it and apply max width */
+        .chatbot-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 800px; /* Max width for desktop view */
+            height: 100vh; /* Full viewport height */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Equivalent to shadow-md */
+            border-radius: 0.5rem; /* Equivalent to rounded-lg */
+            overflow: hidden;
+        }
+
+        /* Header styling */
+        .chatbot-header {
+            background: linear-gradient(to right, #2563eb, #1e40af); /* Equivalent to bg-gradient-to-r from-blue-600 to-blue-800 */
+            color: #fff; /* text-white */
+            padding: 1rem; /* p-4 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* shadow-md */
+            border-bottom-left-radius: 0.5rem; /* rounded-b-lg */
+            border-bottom-right-radius: 0.5rem; /* rounded-b-lg */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .chatbot-header h1 {
+            font-size: 1.5rem; /* text-2xl */
+            font-weight: 700; /* font-bold */
+            display: flex;
+            align-items: center;
+        }
+        .chatbot-header svg {
+            width: 2rem; /* w-8 */
+            height: 2rem; /* h-8 */
+            margin-right: 0.75rem; /* mr-3 */
+        }
+
+        /* Main chat area */
+        .chatbot-main {
+            flex: 1;
+            overflow: hidden;
+            padding: 1rem; /* p-4 */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Chat messages display area */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem; /* p-4 */
+            background-color: #fff; /* bg-white */
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06); /* shadow-inner */
+            margin-bottom: 1rem; /* mb-4 */
+            display: flex;
+            flex-direction: column; /* Ensure messages stack vertically */
+        }
+
+        /* Individual message styling */
+        .message-container {
+            display: flex;
+            margin-bottom: 1rem; /* mb-4 */
+        }
+        .message-user {
+            justify-content: flex-end; /* justify-end */
+        }
+        .message-bot {
+            justify-content: flex-start; /* justify-start */
+        }
+        .message-bubble {
+            max-width: 80%; /* max-w-xs (for smaller screens) & max-w-md (for larger screens) */
+            padding: 0.5rem 1rem; /* px-4 py-2 */
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* shadow-md */
+            display: flex; /* To align play button with text */
+            align-items: center;
+        }
+        .message-user .message-bubble {
+            background-color: #3b82f6; /* bg-blue-500 */
+            color: #fff; /* text-white */
+            border-bottom-right-radius: 0; /* rounded-br-none */
+        }
+        .message-bot .message-bubble {
+            background-color: #e5e7eb; /* bg-gray-200 */
+            color: #1f2937; /* text-gray-800 */
+            border-bottom-left-radius: 0; /* rounded-bl-none */
+        }
+
+        /* Empty chat message styling */
+        .empty-chat {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1; /* Make it take full height */
+            color: #6b7280; /* text-gray-500 */
+            text-align: center;
+        }
+
+        /* Message input form */
+        .message-form {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; /* space-x-3 */
+            background-color: #fff; /* bg-white */
+            padding: 0.75rem; /* p-3 */
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* shadow-md */
+        }
+        .message-form input[type="text"] {
+            flex: 1;
+            padding: 0.75rem; /* p-3 */
+            border: 1px solid #d1d5db; /* border border-gray-300 */
+            border-radius: 0.5rem; /* rounded-lg */
+            outline: none; /* focus:outline-none */
+        }
+        .message-form input[type="text"]:focus {
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* focus:ring-2 focus:ring-blue-500 */
+        }
+        .message-form button {
+            background-color: #2563eb; /* bg-blue-600 */
+            color: #fff; /* text-white */
+            padding: 0.75rem 1.25rem; /* px-5 py-3 */
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* shadow-md */
+            transition: background-color 0.2s ease; /* transition duration-200 */
+        }
+        .message-form button:hover {
+            background-color: #1d4ed8; /* hover:bg-blue-700 */
+        }
+        .message-form button:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* focus:ring-2 focus:ring-blue-500 */
+        }
+        .message-form button:disabled {
+            opacity: 0.5; /* disabled:opacity-50 */
+            cursor: not-allowed; /* disabled:cursor-not-allowed */
+        }
+
+        /* Microphone button specific styling */
+        #mic-button {
+            background-color: #4CAF50; /* Green */
+            padding: 0.75rem 1.0rem; /* Adjusted padding */
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        #mic-button:hover {
+            background-color: #45a049;
+        }
+        #mic-button.recording {
+            background-color: #f44336; /* Red when recording */
+        }
+        #mic-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Play/Pause button for bot messages */
+        .play-button {
+            background-color: #1a73e8; /* Blue */
+            color: white;
+            border-radius: 50%; /* Make it round */
+            width: 28px;
+            height: 28px;
+            min-width: 28px; /* Ensure it doesn't shrink */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            margin-left: 0.5rem; /* Space from text */
+            flex-shrink: 0; /* Prevent it from shrinking */
+            transition: background-color 0.2s ease;
+            border: none; /* Remove default button border */
+        }
+        .play-button:hover {
+            background-color: #1558b3;
+        }
+        .play-button i {
+            font-size: 0.8rem;
+        }
+
+        /* Language selection overlay */
+        .lang-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .lang-panel {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .lang-button {
+            background-color: #4285F4; /* Google Blue */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border: none;
+            font-size: 1.1rem;
+        }
+        .lang-button:hover {
+            background-color: #357ae8;
+        }
+
+        /* Loading animation */
+        .dot-pulse {
+            position: relative;
+            left: -9999px;
+            width: 10px;
+            height: 10px;
+            border-radius: 5px;
+            background-color: #9880ff;
+            color: #9880ff;
+            box-shadow: 9999px 0 0 -5px;
+            animation: dotPulse 1.5s infinite linear;
+            animation-delay: .25s;
+        }
+        .dot-pulse::before, .dot-pulse::after {
+            content: '';
+            display: inline-block;
+            position: absolute;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 5px;
+            background-color: #9880ff;
+            color: #9880ff;
+        }
+        .dot-pulse::before {
+            box-shadow: 9984px 0 0 -5px;
+            animation: dotPulseBefore 1.5s infinite linear;
+            animation-delay: 0s;
+        }
+        .dot-pulse::after {
+            box-shadow: 10014px 0 0 -5px;
+            animation: dotPulseAfter 1.5s infinite linear;
+            animation-delay: .5s;
+        }
+        @keyframes dotPulseBefore {
+            0% {
+                box-shadow: 9984px 0 0 -5px;
+            }
+            30% {
+                box-shadow: 9984px 0 0 2px;
+            }
+            60%,
+            100% {
+                box-shadow: 9984px 0 0 -5px;
+            }
+        }
+        @keyframes dotPulse {
+            0% {
+                box-shadow: 9999px 0 0 -5px;
+            }
+            30% {
+                box-shadow: 9999px 0 0 2px;
+            }
+            60%,
+            100% {
+                box-shadow: 9999px 0 0 -5px;
+            }
+        }
+        @keyframes dotPulseAfter {
+            0% {
+                box-shadow: 10014px 0 0 -5px;
+            }
+            30% {
+                box-shadow: 10014px 0 0 2px;
+            }
+            60%,
+            100% {
+                box-shadow: 10014px 0 0 -5px;
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (min-width: 768px) { /* md: equivalent */
+            .message-bubble {
+                max-width: 66.666667%; /* max-w-md */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbot-container">
+        <header class="chatbot-header">
+            <h1>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+                Assistant Chatbot
+            </h1>
+        </header>
+
+        <main class="chatbot-main">
+            <div id="chat-messages" class="chat-messages">
+                </div>
+
+            <form id="message-form" class="message-form">
+                <button type="button" id="mic-button" class="text-white">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <input type="text" id="message-input" placeholder="Type or speak your question here..." />
+                <button type="submit" id="send-button">Send</button>
+            </form>
+        </main>
+    </div>
+
+    <div id="lang-overlay" class="lang-overlay">
+        <div class="lang-panel">
+            <h2 class="text-xl font-semibold mb-4">Please select your preferred language:</h2>
+            <button class="lang-button" data-lang="en-US">English</button>
+            <button class="lang-button" data-lang="id-ID">Bahasa Indonesia</button>
+            <button class="lang-button" data-lang="zh-CN">中文 (Chinese)</button>
+        </div>
+    </div>
+
+    <script>
+        // Get references to HTML elements
+        const chatMessages = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('message-input');
+        const messageForm = document.getElementById('message-form');
+        const sendButton = document.getElementById('send-button');
+        const micButton = document.getElementById('mic-button');
+        const langOverlay = document.getElementById('lang-overlay');
+        const langButtons = document.querySelectorAll('.lang-button');
+
+        // --- Global Language State ---
+        let selectedLanguage = 'en-US'; // Default to English
+        let selectedLanguageName = 'English'; // For display purposes
+
+        // --- Speech Recognition (for audio input) ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        let isRecording = false;
+
+        // --- Speech Synthesis (for audio output) ---
+        const synth = window.speechSynthesis;
+        let currentUtterance = null; // To keep track of the currently speaking utterance
+
+        // --- Functions ---
+
+        /**
+         * Sets the global language and updates UI/STT/TTS settings.
+         * @param {string} langCode - The BCP 47 language tag (e.g., 'en-US', 'zh-CN', 'th-TH').
+         * @param {string} langName - The display name of the language.
+         */
+        const setLanguage = (langCode, langName) => {
+            selectedLanguage = langCode;
+            selectedLanguageName = langName;
+            localStorage.setItem('preferredLanguageCode', langCode);
+            localStorage.setItem('preferredLanguageName', langName);
+            langOverlay.style.display = 'none'; // Hide language selection
+
+            // Update speech recognition language
+            if (SpeechRecognition) {
+                recognition = new SpeechRecognition(); // Re-initialize with new lang
+                recognition.lang = selectedLanguage;
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+                recognition.onstart = () => {
+                    isRecording = true;
+                    micButton.classList.add('recording');
+                    micButton.innerHTML = '<i class="fas fa-stop-circle"></i>';
+                    messageInput.placeholder = 'Listening...';
+                    sendButton.disabled = true;
+                };
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    messageInput.value = transcript;
+                    sendMessage(transcript); // Automatically send
+                };
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    addMessageToChat('bot', `Speech recognition error: ${event.error}. Please try again.`);
+                    stopRecording();
+                };
+                recognition.onend = () => {
+                    stopRecording();
+                };
+            } else {
+                micButton.disabled = true; // Disable if not supported
+            }
+
+            // Welcome message in selected language
+            const welcomeText = {
+                'en-US': "Hello! I am your AI Assistant. How can I help you today?",
+                'id-ID': "Halo! Saya AI Assistant. Apa yang bisa saya bantu?",
+                'zh-CN': "你好！我是AI助理。有什麼可以幫你的嗎？"  
+            };
+            addMessageToChat('bot', welcomeText[selectedLanguage] || welcomeText['en-US']);
+            messageInput.placeholder = `Type your question in ${selectedLanguageName}...`;
+            messageInput.focus();
+        };
+
+        /**
+         * Adds a message to the chat display.
+         * @param {string} role - The role of the message sender ('user' or 'bot').
+         * @param {string} text - The message content.
+         */
+        const addMessageToChat = (role, text) => {
+            // Remove the empty chat message if present (not strictly needed with initial greeting)
+            const emptyChat = chatMessages.querySelector('.empty-chat');
+            if (emptyChat) {
+                chatMessages.removeChild(emptyChat);
+            }
+
+            const messageContainer = document.createElement('div');
+            messageContainer.classList.add('message-container');
+            messageContainer.classList.add(role === 'user' ? 'message-user' : 'message-bot');
+
+            const messageBubble = document.createElement('div');
+            messageBubble.classList.add('message-bubble');
+            
+            const messageTextSpan = document.createElement('span');
+            messageTextSpan.innerHTML = text; // Use innerHTML to allow for basic formatting if needed
+            messageBubble.appendChild(messageTextSpan);
+
+            if (role === 'bot') {
+                const playButton = document.createElement('button');
+                playButton.classList.add('play-button');
+                playButton.innerHTML = '<i class="fas fa-volume-up"></i>'; // Volume icon
+                playButton.title = 'Listen to response';
+
+                playButton.onclick = () => {
+                    // Stop any other speaking before starting new
+                    if (synth.speaking && currentUtterance) {
+                        synth.cancel();
+                        if (currentUtterance.buttonRef) {
+                            currentUtterance.buttonRef.innerHTML = '<i class="fas fa-volume-up"></i>';
+                        }
+                    }
+
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = selectedLanguage; // Use selected language for TTS
+                    utterance.pitch = 1;
+                    utterance.rate = 1;
+                    utterance.buttonRef = playButton; // Store reference to update button icon
+
+                    utterance.onstart = () => {
+                        playButton.innerHTML = '<i class="fas fa-pause"></i>'; // Pause icon when speaking
+                    };
+                    utterance.onend = () => {
+                        playButton.innerHTML = '<i class="fas fa-volume-up"></i>'; // Volume icon when finished
+                        currentUtterance = null;
+                    };
+                    utterance.onerror = (event) => {
+                        console.error('SpeechSynthesisUtterance.onerror', event);
+                        playButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i>'; // Error icon
+                        currentUtterance = null;
+                    };
+
+                    currentUtterance = utterance;
+                    synth.speak(utterance);
+                };
+                messageBubble.appendChild(playButton);
+            }
+
+            messageContainer.appendChild(messageBubble);
+            chatMessages.appendChild(messageContainer);
+
+            // Scroll to the bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        };
+
+        /**
+         * Shows or hides the loading indicator.
+         * @param {boolean} show - True to show, false to hide.
+         */
+        const showLoadingIndicator = (show) => {
+            let loadingBubble = chatMessages.querySelector('.loading-bubble');
+            if (show && !loadingBubble) {
+                loadingBubble = document.createElement('div');
+                loadingBubble.classList.add('message-container', 'message-bot', 'loading-bubble');
+                const bubbleContent = document.createElement('div');
+                bubbleContent.classList.add('message-bubble');
+                const dotPulse = document.createElement('div');
+                dotPulse.classList.add('dot-pulse');
+                bubbleContent.appendChild(dotPulse);
+                loadingBubble.appendChild(bubbleContent);
+                chatMessages.appendChild(loadingBubble);
+                chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to new loading indicator
+            } else if (!show && loadingBubble) {
+                chatMessages.removeChild(loadingBubble);
+            }
+            messageInput.disabled = show;
+            sendButton.disabled = show;
+            micButton.disabled = show; // Disable mic during loading
+            sendButton.textContent = show ? 'Sending...' : 'Send';
+        };
+
+        /**
+         * Handles sending a message to the Gemini API.
+         * @param {string} userMessage - The message typed by the user.
+         */
+        const sendMessage = async (userMessage) => {
+            if (!userMessage.trim()) return;
+
+            // Stop any ongoing speech synthesis before sending new message
+            synth.cancel();
+            if (currentUtterance && currentUtterance.buttonRef) {
+                currentUtterance.buttonRef.innerHTML = '<i class="fas fa-volume-up"></i>';
+                currentUtterance = null;
+            }
+
+            addMessageToChat('user', userMessage);
+            messageInput.value = ''; // Clear input
+            showLoadingIndicator(true);
+
+            try {
+                const backendUrl = 'http://127.0.0.1:5000/chat'; // Replace with your backend URL if deployed elsewhere
+
+                const response = await fetch(backendUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        message: userMessage,
+                        language: selectedLanguage // Pass selected language to backend
+                    })
+                });
+
+                const result = await response.json();
+
+                let botResponse = "Sorry, I couldn't get a response from the AI at this time.";
+
+                if (result.response) {
+                    botResponse = result.response;
+                } else if (result.error) {
+                    botResponse = `Backend Error: ${result.error}`;
+                }
+
+                addMessageToChat('bot', botResponse);
+
+            } catch (error) {
+                console.error('Error sending message to backend:', error);
+                addMessageToChat('bot', 'An error occurred while connecting to the backend. Please ensure the backend server is running.');
+            } finally {
+                showLoadingIndicator(false);
+            }
+        };
+
+        // Helper function to stop recording and reset UI
+        const stopRecording = () => {
+            isRecording = false;
+            micButton.classList.remove('recording');
+            micButton.innerHTML = '<i class="fas fa-microphone"></i>';
+            messageInput.placeholder = `Type your question in ${selectedLanguageName}...`;
+            sendButton.disabled = false;
+        };
+
+        // --- Event Listeners ---
+
+        // Form submission (text input)
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            sendMessage(messageInput.value);
+        });
+
+        // Mic button click
+        micButton.addEventListener('click', () => {
+            if (!SpeechRecognition) {
+                alert('Speech Recognition is not supported in this browser. Please use Chrome or Edge.');
+                return;
+            }
+
+            if (!isRecording) {
+                synth.cancel(); // Stop any TTS before starting mic
+                recognition.start(); // Uses `recognition` object initialized in setLanguage
+            } else {
+                recognition.stop();
+            }
+        });
+
+        // Language selection buttons
+        langButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const langCode = button.dataset.lang;
+                const langName = button.textContent;
+                setLanguage(langCode, langName);
+            });
+        });
+
+        // --- Initial Chatbot Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check for a previously selected language
+            const storedLangCode = localStorage.getItem('preferredLanguageCode');
+            const storedLangName = localStorage.getItem('preferredLanguageName');
+
+            if (storedLangCode && storedLangName) {
+                setLanguage(storedLangCode, storedLangName);
+            } else {
+                // If no language stored, show selection overlay
+                langOverlay.style.display = 'flex';
+                // Add an initial prompt to select language (optional, could be via TTS as well)
+                // addMessageToChat('bot', 'Welcome! Please select your preferred language to start.');
+            }
+        });
+    </script>
+</body>
+</html>

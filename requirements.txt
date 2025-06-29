@@ -1,0 +1,14 @@
+numpy
+openai
+python-dotenv
+tqdm
+pypdf
+faiss-cpu
+Flask
+openai
+azure-identity
+langchain
+langchain-community
+langchain-huggingface
+sentence-transformers
+faiss-cpu
