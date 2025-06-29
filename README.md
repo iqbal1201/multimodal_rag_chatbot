@@ -1,104 +1,156 @@
-📚 Chatbot Agent - Company Policy
-This Flask-based chatbot is designed to provide quick and accurate answers to questions regarding PT Rekso Nasional Food's company policies for the years 2023–2025. It achieves this by leveraging Azure OpenAI for conversational AI and Retrieval-Augmented Generation (RAG) to fetch relevant information directly from official PDF policy documents. The documents are processed into a FAISS vector database using HuggingFace multilingual embeddings for efficient retrieval.
+# AI Policy Assistant Chatbot with RAG, Speech-to-Text (STT) & Text-to-Speech (TTS)
 
-✨ Features
-Azure OpenAI Chat API (GPT-4o): Utilizes the advanced GPT-4o model for highly accurate and contextual natural language understanding.
+This project implements an intelligent chatbot designed to answer user questions based on specific company policy documents. It leverages Azure AI Services for powerful natural language processing and speech capabilities, combined with a Retrieval-Augmented Generation (RAG) architecture to provide accurate and contextual responses.
 
-Retrieval-Augmented Generation (RAG) with FAISS: Enhances chatbot responses by retrieving relevant policy clauses from the stored vector database, ensuring answers are grounded in official documents.
+The chatbot features a user-friendly web interface with both text and voice interaction, supporting multiple languages.
 
-Multilingual Embedding Model: Integrates HuggingFace's paraphrase-multilingual-MiniLM-L12-v2 to support policy inquiries in English, Bahasa Indonesia, and Chinese.
+## Features
 
-Local FAISS Vectorstore: Policy document embeddings are stored locally, enabling fast and efficient information retrieval without external database dependencies.
+* **Retrieval-Augmented Generation (RAG):** Utilizes FAISS (Facebook AI Similarity Search) and HuggingFace embeddings to retrieve relevant information from pre-indexed company policy documents, ensuring answers are grounded in provided context.
+* **Azure OpenAI Integration:** Processes user queries and generates comprehensive responses using Azure OpenAI's language models.
+* **Multilingual Support:** Communicate with the chatbot in English (`en-US`), Bahasa Indonesia (`id-ID`), and Chinese (`zh-CN`).
+* **Real-time Speech-to-Text (STT):** Transcribes user's spoken input into text *as they speak* using the browser's native Web Speech API, providing an immediate and interactive experience.
+* **Azure Text-to-Speech (TTS):** Synthesizes the chatbot's text responses into natural-sounding speech using high-quality Azure AI Speech neural voices.
+* **Intuitive Web Interface:** A clean and responsive web interface built with HTML, JavaScript, and Tailwind CSS.
+* **Scalable Backend:** Flask-based backend capable of handling API requests for chat, STT (if needed for batch processing), and TTS.
 
-Flask API Endpoint /chat with CORS: Provides a flexible and accessible RESTful API for integrating the chatbot into various frontend applications, with CORS enabled for broad compatibility.
+## Technologies Used
 
-Multi-language Support: Designed to understand and respond to queries in English, Bahasa Indonesia, and Chinese, catering to a diverse workforce.
+### Backend (Python/Flask)
 
-📂 Project Structure
-project-root/
-├── data/
-│   └── peraturan-rekso.pdf    # Source PDF document containing company policies
-├── vectorstore/
-│   └── rekso_2023_2025/       # Directory to store the FAISS vector database
-├── app.py                     # Flask application backend for the chatbot API
-├── rag_builder.py             # Script to process PDFs and build the FAISS vectorstore
-├── templates/
-│   └── index.html             # Basic HTML frontend web client for interaction
-├── requirements.txt           # Python dependencies for the project
-└── README.md                  # This README file
+* **Python 3.x**
+* **Flask:** Web framework for the API endpoints.
+* **`openai`:** Python client for Azure OpenAI Service.
+* **`azure-identity`:** For Azure Active Directory (Entra ID) authentication with Azure services.
+* **`azure-cognitiveservices-speech`:** Azure AI Speech SDK for STT and TTS.
+* **`langchain-community`:** For FAISS vector store integration.
+* **`langchain-huggingface`:** For `HuggingFaceEmbeddings` (specifically "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2").
 
-🚀 Installation & Setup
-Follow these steps to get the chatbot up and running on your local machine.
 
-1. Clone the Repository
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
+### Frontend (Web)
 
-(Replace your-username/your-repo-name.git with your actual repository URL)
+* **HTML5, CSS (Tailwind CSS):** Structure and styling.
+* **JavaScript:** For dynamic interaction, API calls, and integration with browser's Web Speech API.
+* **Web Speech API:** Browser-native API for real-time Speech-to-Text input.
+* **Font Awesome:** For icons (microphone, play/pause, etc.).
 
-2. Create and Activate a Virtual Environment (Recommended)
-python -m venv venv
-# On Windows
-.\venv\Scripts\activate
-# On macOS/Linux
-source venv/bin/activate
+### Azure AI Services
 
-3. Install Python Dependencies
-With your virtual environment activated, install all required Python libraries:
+* **Azure OpenAI Service:** With a deployed model (e.g., `gpt-35-turbo`, `gpt-4`) configured for chat completions.
+* **Azure AI Speech Service:** For Speech-to-Text and Text-to-Speech capabilities.
 
-pip install -r requirements.txt
+### Vector Store
 
-requirements.txt content:
-flask
-flask-cors
-openai
-azure-identity
-langchain
-langchain-community
-langchain-huggingface
-sentence-transformers
-faiss-cpu
-python-dotenv
+* **FAISS:** Used to store and retrieve embeddings of the company policy documents.
 
-4. Prepare Policy Document
-Place your company policy PDF document (e.g., peraturan-rekso.pdf) into the data/ directory.
+## Project Structure
 
-5. Set Up Azure OpenAI Credentials
-Create a .env file in the project-root/ directory and add your Azure OpenAI service details.
+├── app.py                  # Flask backend application
+├── index.html              # Frontend web interface
+├── requirements.txt        # Python dependencies
+├── .env.example            # Example environment variables file
+├── vectorstore/            # Directory for FAISS index (e.g., rekso_2023_2025_v2)
+│   └── (FAISS index files)
 
-AZURE_OPENAI_API_KEY="your_azure_openai_api_key"
-AZURE_OPENAI_ENDPOINT="your_azure_openai_endpoint"
-AZURE_OPENAI_DEPLOYMENT_NAME="your_gpt4o_deployment_name" # e.g., gpt-4o-deployment
 
-(Ensure your_gpt4o_deployment_name matches the deployment name of your GPT-4o model on Azure OpenAI Studio.)
+## Setup and Installation
 
-6. Build the FAISS Vectorstore
-Run the rag_builder.py script to process the PDF document and create the FAISS vector database. This may take some time depending on the size of your PDF.
+### Prerequisites
 
-python rag_builder.py
+1.  **Python 3.x:** Installed on your system.
+2.  **Azure Subscription:**
+    * **Azure OpenAI Service:** Create a resource and deploy a chat completion model (e.g., `gpt-35-turbo`, `gpt-4`). Note its `Endpoint` and `Deployment name`.
+    * **Azure AI Speech Service:** Create a resource. Note its `Key` and `Region`.
+3.  **FFmpeg:**
+    * `pydub` (used in backend for robust STT audio handling) requires `ffmpeg` to be installed and available in your system's PATH.
+    * **Windows:** Download binaries from [gyan.dev/ffmpeg/builds/](https://www.gyan.dev/ffmpeg/builds/) and add the `bin` folder to your system's PATH.
+    * **macOS:** `brew install ffmpeg`
+    * **Linux (Ubuntu/Debian):** `sudo apt-get update && sudo apt-get install ffmpeg`
+4.  **Company Policy Data:** Ensure you have processed your company policy documents and created the FAISS vector store located at `vectorstore/rekso_2023_2025_v2`. This project assumes this vector store is already available.
 
-This will create the rekso_2023_2025 directory inside vectorstore/.
+### Backend Setup
 
-▶️ Running the Chatbot
-1. Start the Flask Backend
-From the project-root/ directory, run the Flask application:
+1.  **Clone the repository:**
+    ```bash
+    git clone <your-repo-url>
+    cd <your-project-directory>
+    ```
 
-python app.py
+2.  **Create a Python Virtual Environment (recommended):**
+    ```bash
+    python -m venv venv
+    ```
 
-The Flask backend will typically run on http://127.0.0.1:5000.
+3.  **Activate the virtual environment:**
+    * **Windows:**
+        ```bash
+        .\venv\Scripts\activate
+        ```
+    * **macOS/Linux:**
+        ```bash
+        source venv/bin/activate
+        ```
 
-2. Access the Frontend
-Open your web browser and navigate to http://127.0.0.1:5000/ (or the address where your Flask app is hosted). This will load the index.html frontend client, allowing you to interact with the chatbot.
+4.  **Install Python dependencies:**
+    Create a `requirements.txt` file in your project root with the following content:
+    ```
+    Flask
+    Flask-Cors
+    openai
+    azure-identity
+    langchain-community
+    langchain-huggingface
+    pydub
+    sentence-transformers
+    ```
+    Then, install them:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-⚙️ Usage
-Once the frontend is loaded, you can type your questions related to PT Rekso Nasional Food's 2023–2025 company policies into the chat interface. The chatbot will retrieve relevant information from the PDF and generate an answer using Azure OpenAI.
+5.  **Configure Environment Variables:**
+    Create a file named `.env` in the root of your project directory, based on `.env.example`, and fill in your Azure credentials:
 
-Example Questions:
-"What is the company's policy on remote work?"
+    ```ini
+    AZURE_OPENAI_ENDPOINT="YOUR_AZURE_OPENAI_ENDPOINT"
+    AZURE_OPENAI_COMPLETION_DEPLOYMENT="YOUR_OPENAI_DEPLOYMENT_NAME"
+    API_VERSION="2024-02-15-preview" # Or latest stable API version you are using
+    SPEECH_KEY="YOUR_AZURE_SPEECH_KEY"
+    SPEECH_REGION="YOUR_AZURE_SPEECH_REGION"
+    ```
+    (Note: `API_VERSION` might need adjustment based on your Azure OpenAI deployment).
 
-"Cuti tahunan berapa hari?" (How many days is annual leave?)
+6.  **Prepare Directories:**
+    Ensure the `vectorstore/rekso_2023_2025_v2` directory exists and contains your FAISS index files.
+    Create an `uploads` directory at the root of your project:
+    ```bash
+    mkdir uploads
+    ```
 
-"公司关于出差报销的规定是什么？" (What are the company's regulations on travel expense reimbursement?)
+7.  **Run the Flask Backend:**
+    ```bash
+    python app.py
+    ```
+    The backend server will typically run on `http://127.0.0.1:5000`.
 
-🤝 Contributing
-Contributions are welcome! Please feel free to open issues or submit pull requests.
+### Frontend Setup
+
+The frontend is a simple HTML, CSS, and JavaScript file. No complex build steps are required.
+
+1.  **Serve the `index.html` file:**
+    To enable microphone access and avoid potential CORS issues when opening `index.html` directly, it's best to serve it via a simple local web server.
+    Open a *new* terminal or command prompt (separate from where your Flask app is running) in your project's root directory:
+    ```bash
+    python -m http.server
+    ```
+    This will serve the files from the current directory, usually on `http://localhost:8000`.
+
+## Usage
+
+1.  **Ensure both the Flask backend and the local frontend server are running.**
+2.  **Open your web browser** and navigate to `http://localhost:8000/index.html` (or the address provided by `python -m http.server`).
+3.  **Select Your Preferred Language:** An overlay will appear prompting you to choose between English, Bahasa Indonesia, or Chinese. Select one to proceed.
+4.  **Start Chatting:**
+    * **Text Input:** Type your question into the input field and click the "Send" button.
+    * **Voice Input (STT):** Click the microphone icon. As you speak, your words will appear in the input field in real-time. Click the microphone again (or stop speaking for a few seconds) to stop recording, and your transcribed message will be sent automatically.
+5.  **Listen to Responses (TTS):** When the chatbot responds, a "play" icon (volume-up) will appear next to its message. Click this icon to listen to the chatbot's response in the selected language.
